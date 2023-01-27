@@ -1,0 +1,323 @@
+<!doctype html>
+<html><head><title>GS1 Myanmar Barcode Testin Stage</title>
+<meta charset="utf-8" />
+<meta name="keywords" content="bar code, barcode generator, online barcode generator, free barcode generator, javascript, javascript library, nodejs, QR Code, EAN, EAN 13, Code 128, UPC, ISBN, ITF 14, Code 39, GS1, GS1 128, PDF417, HIBC, DataMatrix, Data Matrix, DataBar, OCR, OCR B, OCR font, Aztec Code, PostNet, USPS, Pharmacode" />
+<meta name="description" content="JavaScript barcode generator and library.  Create any barcode in your browser." />
+<link rel="stylesheet" type="text/css" href="lib/demo.css">
+<script type="text/javascript" src="dist/bwip-js-min.js"></script>
+<script type="text/javascript" src="lib/symdesc.js"></script>
+<script type="text/javascript" src="lib/canvas-toblob.js"></script>
+<script type="text/javascript" src="lib/filesaver.js"></script>
+<script type="text/javascript" src="lib/inconsolata.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.3/flowbite.min.css"  rel="stylesheet" />
+<link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.3/flowbite.min.js"></script> -->
+<link rel="icon" href="images/logo_s.png">
+<script type="text/javascript">
+window.addEventListener('load', function() {
+	var lastSymbol, lastBarText, lastAltText, lastOptions, lastRotate, lastScaleX, lastScaleY;
+	try {
+		lastSymbol	= localStorage.getItem('bwipjsLastSymbol');
+		lastBarText	= localStorage.getItem('bwipjsLastBarText');
+		lastAltText	= localStorage.getItem('bwipjsLastAltText');
+		lastOptions = localStorage.getItem('bwipjsLastOptions');
+		lastRotate	= localStorage.getItem('bwipjsLastRotate');
+		lastScaleX  = +localStorage.getItem('bwipjsLastScaleX');
+		lastScaleY  = +localStorage.getItem('bwipjsLastScaleY');
+	} catch (e) {
+	}
+
+	// Set up the select list of barcode types
+	var sel = document.getElementById('symbol');
+	var opts = [];
+	for (var id in symdesc) {
+		opts.push(symdesc[id]);
+	}
+	opts.sort(function (a,b) { return a.desc < b.desc ? -1 : 1 });
+	for (var i = 0, l = opts.length; i < l; i++) {
+		var elt = document.createElement('option');
+		elt.textContent = opts[i].desc;
+		elt.value = opts[i].sym;
+		sel.appendChild(elt);
+	}
+
+	sel.addEventListener('change', function(ev) {
+			var desc = symdesc[sel.value];
+			if (desc) {
+				document.getElementById('symtext').value = desc.text;
+				document.getElementById('symopts').value = desc.opts;
+			} else {
+				document.getElementById('symtext').value = '';
+				document.getElementById('symopts').value = '';
+			}
+			document.getElementById('symaltx').value = '';
+			document.getElementById('saveas').style.visibility = 'hidden';
+			document.getElementById('stats').textContent = '';
+			var canvas = document.getElementById('canvas');
+			canvas.width = canvas.width;
+		});
+
+	if (lastSymbol) {
+		sel.value = lastSymbol;
+	} else {
+		sel.selectedIndex = 0;
+	}
+	var evt = document.createEvent("HTMLEvents");
+	evt.initEvent("change", false, true);
+	sel.dispatchEvent(evt);
+
+	if (lastBarText) {
+		document.getElementById('symtext').value = lastBarText;
+		document.getElementById('symaltx').value = lastAltText;
+		document.getElementById('symopts').value = lastOptions;
+	}
+	if (lastScaleX && lastScaleY) {
+		document.getElementById('scaleX').value = lastScaleX;
+		document.getElementById('scaleY').value = lastScaleY;
+	}
+	if (lastRotate) {
+		document.getElementById('rotate' + lastRotate).checked = true;
+	}
+
+	document.getElementById('scaleX').addEventListener('change', function(ev) {
+			document.getElementById('scaleY').value = ev.target.value;
+		});
+	document.getElementById('render').addEventListener('click', render);
+	document.getElementById('saveas').style.visibility = 'hidden';
+
+	// Allow Enter to render
+	document.getElementById('params').addEventListener('keypress', function(ev) {
+		if (ev.which == 13) {
+			render();
+			ev.stopPropagation();
+			ev.preventDefault();
+			return false;
+		}
+	});
+
+	document.getElementById('versions').textContent =
+				'bwip-js ' + bwipjs.BWIPJS_VERSION + ' / BWIPP ' + bwipjs.BWIPP_VERSION;
+
+    // A reasonable match to OCR-B metrics.
+    bwipjs.loadFont("Inconsolata", 95, 105, Inconsolata);
+});
+
+function render() {
+	var elt  = symdesc[document.getElementById('symbol').value];
+	var text = document.getElementById('symtext').value.trim();
+	var alttext = document.getElementById('symaltx').value.trim();
+	var options = document.getElementById('symopts').value.trim();
+	var rotate = document.querySelector('input[name="rotate"]:checked').value;
+	var scaleX = +document.getElementById('scaleX').value || 2;
+	var scaleY = +document.getElementById('scaleY').value || 2;
+
+	try {
+		localStorage.setItem('bwipjsLastSymbol',  elt.sym);
+		localStorage.setItem('bwipjsLastBarText', text);
+		localStorage.setItem('bwipjsLastAltText', alttext);
+		localStorage.setItem('bwipjsLastOptions', options);
+		localStorage.setItem('bwipjsLastScaleX', scaleX);
+		localStorage.setItem('bwipjsLastScaleY', scaleY);
+		localStorage.setItem('bwipjsLastRotate', rotate);
+	} catch (e) {
+	}
+
+	// Clear the page
+	document.getElementById('output').value = '';
+	document.getElementById('stats').value = '';
+	document.getElementById('saveas').style.visibility = 'hidden';
+	document.getElementById('output').textContent = '';
+
+	var canvas = document.getElementById('canvas');
+	canvas.height = 1;
+	canvas.width  = 1;
+	canvas.style.visibility = 'hidden';
+
+	// Convert the options to an object.
+	let opts = {};
+	let aopts = options.split(' ');
+	for (let i = 0; i < aopts.length; i++) {
+		if (!aopts[i]) {
+			continue;
+		}
+		var eq = aopts[i].indexOf('=');
+		if (eq == -1) {
+			opts[aopts[i]] = true;
+		} else {
+			opts[aopts[i].substr(0, eq)] = aopts[i].substr(eq+1);
+		}
+	}
+
+	// Finish up the options
+	opts.text = text;
+	opts.bcid = elt.sym;
+	opts.scaleX = scaleX;
+	opts.scaleY = scaleY;
+	opts.rotate = rotate;
+	if (alttext) {
+		opts.alttext = alttext;
+	}
+
+	// Draw the bar code to the canvas
+	try {
+		let ts0 = new Date;
+		bwipjs.toCanvas(canvas, opts);
+		show(ts0, new Date);
+	} catch (e) {
+		// Watch for BWIPP generated raiseerror's.
+		var msg = (''+e).trim();
+		if (msg.indexOf("bwipp.") >= 0) {
+			document.getElementById('output').textContent = msg;
+		} else if (e.stack) {
+			// GC includes the message in the stack.  FF does not.
+			document.getElementById('output').textContent = 
+					(e.stack.indexOf(msg) == -1 ? msg + '\n' : '') + e.stack;
+		} else {
+			document.getElementById('output').textContent = msg;
+		}
+		return;
+	}
+
+	function show(ts0, ts1) {
+		canvas.style.visibility = 'visible';
+		setURL();
+		// document.getElementById('stats').textContent = 'Rendered in ' + (ts1-ts0) + ' msecs.';
+		document.getElementById('stats').textContent = 'Grab your barcode image now!';
+		document.getElementById('saveas').style.visibility = 'visible';
+		saveCanvas.basename = elt.sym + '-' + text.replace(/[^a-zA-Z0-9._]+/g, '-');
+	}
+}
+function saveCanvas(type, ext) {
+	var canvas = document.getElementById('canvas');
+	canvas.toBlob(function (blob) {
+					  saveAs(blob, saveCanvas.basename + ext);
+				  }, type, 1);
+}
+function setURL() {
+	var elt  = symdesc[document.getElementById('symbol').value];
+	var text = document.getElementById('symtext').value.trim();
+	var alttext = document.getElementById('symaltx').value.trim();
+	var options = document.getElementById('symopts').value.trim();
+	var rotate = document.querySelector('input[name="rotate"]:checked').value;
+	var scaleX = +document.getElementById('scaleX').value || 2;
+	var scaleY = +document.getElementById('scaleY').value || scaleX;
+
+	var url = 'http://bwipjs-api.metafloor.com/?bcid=' + elt.sym + 
+				'&text=' + encodeURIComponent(text) +
+				(alttext ? '&alttext=' + encodeURIComponent(alttext) : '') +
+				(options ? '&' + options.replace(/ +/g, '&') : '') +
+				(rotate != 'N' ? '&rotate=' + rotate : '') +
+				(scaleX == scaleY ? '&scale=' + scaleX
+								  : '&scaleX=' + scaleX + '&scaleY=' + scaleY)
+				;
+
+	document.getElementById('apiurl').href = url;
+}
+</script>
+</head><body>
+<div id="header">
+	<img src="images/logo.png" width="8%" id="" alt="">
+	<div id="bwip-js">
+		<span >
+			<!-- GS1 Myanmar Barcode Generator -->
+		</span>
+		
+	</div>
+	
+</div>
+<div id="params">
+<table border=0 cellpading=0 cellspacing=0><tr>
+<td style="vertical-align:top">
+	<table border=0 cellpading=0 cellspacing=0>
+	
+		<h1 style="text-align: center; font-size: x-large; font-weight: 600;">Testin Barcode Generator (GS1 Myanmar)</h1><br>
+		<!-- <b><p style="font-size: large;">Type the 13-digit GTIN (EAN) here</p></b> -->
+		<span style="font-weight: 500;">Type GTIN (Barcode number) <br> Eg below:</span>
+	<input>
+
+		<div class="relative" style="margin-top: 10px;">
+			<input type="text"  id="symtext" type="text" name="floating_outlined" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 
+			bg-transparent rounded-lg border-1 
+			border-gray-400 appearance-none dark:text-white dark:border-gray-600 
+			dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
+			<label for="floating_outlined" class="absolute text-sm text-gray-400 dark:text-gray-400 duration-300 
+			transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 
+			px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+				GTIN</label>
+		</div>
+
+
+		<br><span style="font-weight: 500;">Barcode Type (Only Support GS1 Standard)</span>
+		<br><select id="symbol" >
+			
+		</select>
+<br><br>
+<span style="font-weight: 500;">Size X,Y</span> &nbsp;
+
+
+		<input  style="width: 60px;" type="number" min=1 max=9 step=1 id="scaleX" value=2>&nbsp;
+		<input  style="width: 60px;" type="number" min=1 max=9 step=1 id="scaleY" value=2>&nbsp;
+	<br><br>
+	<span style="font-weight: 500;">Image Rotation</span> 
+		<div style="display: flex;">
+		<p for="rotateN"><input type="radio" style="cursor: pointer;" name="rotate" value="N"
+			id="rotateN" checked>&nbsp;Normal</p> &nbsp;&nbsp;&nbsp;
+		<p for="rotateR"><input  style="cursor: pointer;" type="radio" name="rotate" value="R"
+			id="rotateR">&nbsp;Right</p>&nbsp;&nbsp;&nbsp;
+		<p for="rotateL"><input style="cursor: pointer;" type="radio" name="rotate" value="L"
+			id="rotateL">&nbsp;Left</p>&nbsp;&nbsp;&nbsp;
+		<p for="rotateI"><input style="cursor: pointer;" type="radio" name="rotate" value="I"
+			id="rotateI">&nbsp;Invert</p>&nbsp;&nbsp;&nbsp;
+	
+	</div>
+		<br>
+	<p style="font-weight: 900;">Example Size</p>
+	<tr><td><img src="images/example.jpg" width="40%" alt=""><br>
+		<!-- <button style="margin-top:1ex" id="render">Show Barcode</button> -->
+		<button class="button-79" role="button" id="render">Show Barcode</button>
+	<tr hidden><th>Alt Text:<td><input id="symaltx" type="text">
+	<tr hidden><th>Options:<td><input id="symopts" type="text">
+	<tr><td> <br>
+		<div id="content" styl="content-align: center;">
+			<canvas id="canvas" width=1 height=1 style="border:1px solid #fff;visibility:hidden"></canvas>
+			<div id="output" style="white-space:pre"></div>
+			</div>
+		<div id="saveas">
+			<a class="saveas" href="javascript:saveCanvas('image/png','.png')"  
+				style="text-decoration: none; font-weight: 500; font-family: Poppins;">
+			<button class="btn-2">
+				<span style="color: #f16334;">Save (PNG)</span> 
+			</button></a>
+		
+		&nbsp;&nbsp;
+		<a class="saveas" href="javascript:saveCanvas('image/jpeg','.jpg')"  style="text-decoration: none; 
+			 font-family: Poppins;">
+		<button class="btn-2">
+			<span style="color: #f16334;">Save (JPEG)</span> 
+		</button></a>
+		
+		&nbsp;&nbsp;
+		<a class="saveas" target="_blank" id="apiurl" href="" 
+			style="text-decoration: none;  font-family: Poppins;">
+		<button class="btn-2">
+			 <span style="color: #f16334;">Go (URL)</span> 
+		</button>
+	</a>
+		
+		&nbsp;&nbsp;
+		</div>
+		
+		<div hidden style="text-align: center;" id="stats">
+		
+		</div>
+		
+		
+	</table>
+<td style="padding-right:15mm;vertical-align:top">
+	
+<tr><td><br>
+</table>
+</div>
+
+</body>
+</html>

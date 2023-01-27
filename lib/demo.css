@@ -1,0 +1,304 @@
+/* bwip-js : lib/demo.css */
+body {
+	font-size:			11pt;
+	font-family: 		"Poppins";
+	margin:				0px;
+}
+#header {
+	position:			relative;
+	background-color:	#f3eeee;
+	color:				rgb(156, 54, 13);
+	height:				48px;
+	padding-left:		21px;
+	padding-top:		0px;
+	padding-bottom:		20px;
+	margin-bottom:		17px;
+}
+#header #bwip-js {
+	font-size:			25px;
+	font-family: 		"Lucida Grande",Calibri,Helvetica,Arial,sans-serif;
+	font-weight:		bold;
+	position:			absolute;
+	bottom:				21px;
+	/* right: 			    10px; */
+	right: 500px;
+}
+.btn-2{
+	background-color:#07316e; /* Green */
+	border: none;
+	color: white;
+	padding: 8px 10px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 13px;
+	margin: 4px 2px;
+	cursor: pointer;
+	-webkit-transition-duration: 0.4s; /* Safari */
+	transition-duration: 0.4s;
+	border-radius: 8px;
+}
+  
+.btn-2:hover{
+
+	box-shadow: 0 15px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+	  
+}
+#header #versions {
+	font-size:			10px;
+	font-family: 		"Lucida Grande",Calibri,Helvetica,Arial,sans-serif;
+	font-weight:		100;
+	color:				#a7a7a7;
+	position:			absolute;
+	bottom:				2px;
+	right:				12px;
+}
+input, select, label, button {
+	font-family:		Verdana, Arial, san-serif;
+	font-size:			10.5pt;
+}
+#symbol, #symtext, #symaltx, #symopts, #scaleX, #scaleY {
+	/* padding:			.5ex; */
+	/* box-sizing:			border-box; */
+	/* border:				1px solid #999; */
+	/* border-radius:		4px; */
+}
+select {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	text-indent: 1px;
+	text-overflow: '';
+  }
+#symbol, #symtext, #symaltx, #symopts, #scaleX, #scaleY {
+	width:				63ex;
+}
+#scaleX, #scaleY {
+	width:				6ex;
+
+}
+#fonthdr {
+	position:			absolute;
+	bottom:				0px;
+	left:				556px;
+	width:				16ex;
+	padding-left:		2ex;
+	padding-top:		1ex;
+	padding-bottom:		1ex;
+	background-color:			#0090ff;
+	border-top-left-radius:		4px;
+	border-top-right-radius:	4px;
+	color:				white;
+	font-family:		Verdana, Arial, san-serif;
+	font-weight:		bold;
+	cursor:				default;
+}
+#fonthdr:hover {
+	background-color:	#32aaff;
+}
+#fontdiv {
+	z-index:			999;
+	position:			absolute;
+	top:				68px;
+	left:				556px;
+	padding:			0px;
+	margin:				0px;
+	border:				0px;
+}
+#fontdiv div.inner {
+	border:				1px solid #b9c3ff;
+	border-top:			0px;
+	border-bottom-left-radius:	3px;
+	border-bottom-right-radius:	3px;
+	padding:			16px;
+	color:				#000;
+	background-color:	#e3eeff;
+	font-family:		Verdana, Arial, san-serif;
+	x-box-shadow:			2px 2px 3px #ddd;
+}
+#dropzone {
+	width:				472px;
+	text-align:			center;
+	border:				1px dashed #999;
+	background-color:	#e7e7e7;
+	color:				#777;
+	overflow:			hidden;
+}
+#dropzone:hover {
+	border:				1px dashed #777;
+	color:				#555;
+	background-color:	#eeeeee;
+}
+#dropzone div.content {
+	padding:			32px 96px;
+}
+#dropzone .fd-file {
+	opacity:			0;
+	font-size:			72px;
+	position:			absolute;
+	right:				0px;
+	top:				0px;
+	width:				1000px;
+}
+#fontlist.visible {
+	margin-top:			20px;
+	border-top:			1px solid #bbb;
+	padding-top:		20px;
+}
+#fontlist td, #fontlist th {
+	text-align:			left;
+	padding:			3px 1ex;
+	border-bottom:		1px solid #999;
+}
+#fontlist td.delete span {
+	opacity:			.4;
+}
+#fontlist td.delete:hover span {
+	opacity:			1;
+}
+#params {
+	margin-left:		12px;
+}
+#content {
+	margin-left:		20px;
+}
+#params th {
+	text-align:			right;
+	padding-right:		1.5ex;
+}
+a.saveas {
+	color:				blue;
+}
+a.saveas:visited {
+	color:				blue;
+}
+button {
+	padding:			.5ex 1ex;
+	min-width:			18ex;
+}
+
+
+.custom-select {
+	position: relative;
+	font-family: Arial;
+  }
+  
+  .custom-select select {
+	display: none; /*hide original SELECT element:*/
+  }
+  
+  .select-selected {
+	background-color: DodgerBlue;
+  }
+  
+  /*style the arrow inside the select element:*/
+  .select-selected:after {
+	position: absolute;
+	content: "";
+	top: 14px;
+	right: 10px;
+	width: 0;
+	height: 0;
+	border: 6px solid transparent;
+	border-color: #fff transparent transparent transparent;
+  }
+  
+  /*point the arrow upwards when the select box is open (active):*/
+  .select-selected.select-arrow-active:after {
+	border-color: transparent transparent #fff transparent;
+	top: 7px;
+  }
+  
+  /*style the items (options), including the selected item:*/
+  .select-items div,.select-selected {
+	color: #ffffff;
+	padding: 8px 16px;
+	border: 1px solid transparent;
+	border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+	cursor: pointer;
+	user-select: none;
+  }
+  
+  /*style items (options):*/
+  .select-items {
+	position: absolute;
+	background-color: DodgerBlue;
+	top: 100%;
+	left: 0;
+	right: 0;
+	z-index: 99;
+  }
+  
+  /*hide the items when the select box is closed:*/
+  .select-hide {
+	display: none;
+  }
+  
+  .select-items div:hover, .same-as-selected {
+	background-color: rgba(0, 0, 0, 0.1);
+  }
+
+
+
+
+  
+  /* CSS */
+  .button-79 {
+	backface-visibility: hidden;
+	background: #002c6c;
+	border: 0;
+	border-radius: .375rem;
+	box-sizing: border-box;
+	color: #fff;
+	cursor: pointer;
+	display: inline-block;
+	font-family: Circular,Helvetica,sans-serif;
+	font-size: 1.125rem;
+	font-weight: 500;
+	letter-spacing: -.01em;
+	line-height: 1.3;
+	padding: 1rem 1.25rem;
+	position: relative;
+	text-align: left;
+	text-decoration: none;
+	transform: translateZ(0) scale(1);
+	transition: transform .2s;
+	user-select: none;
+	-webkit-user-select: none;
+	touch-action: manipulation;
+  }
+  
+  .button-79:disabled {
+	color: #787878;
+	cursor: auto;
+  }
+  
+  .button-79:not(:disabled):hover {
+	transform: scale(1.05);
+  }
+  
+  .button-79:not(:disabled):hover:active {
+	transform: scale(1.05) translateY(.125rem);
+  }
+  
+  .button-79:focus {
+	outline: 0 solid transparent;
+  }
+  
+  .button-79:focus:before {
+	border-width: .125rem;
+	content: "";
+	left: calc(-1*.375rem);
+	pointer-events: none;
+	position: absolute;
+	top: calc(-1*.375rem);
+	transition: border-radius;
+	user-select: none;
+  }
+  
+  .button-79:focus:not(:focus-visible) {
+	outline: 0 solid transparent;
+  }
+  
+  .button-79:not(:disabled):active {
+	transform: translateY(.125rem);
+  }
